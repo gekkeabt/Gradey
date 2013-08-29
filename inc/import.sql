@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: localhost
--- Genereertijd: 28 aug 2013 om 14:55
+-- Genereertijd: 29 aug 2013 om 19:24
 -- Serverversie: 5.5.20
 -- PHP-Versie: 5.3.9
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `grades`
 --
+CREATE DATABASE `grades` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `grades`;
 
 -- --------------------------------------------------------
 
@@ -33,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `grades` (
   `weight` int(11) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=55 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=134 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

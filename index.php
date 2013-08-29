@@ -1,13 +1,32 @@
 <?php
+// Made By Ahmed Bakay 			//
+// http://abakay.tk 			// 
+// Version 1.3 					//
+// See github for changelogs	//
 ob_start();
 $hostname = "localhost"; 
-$username = "your_username";
-$password = "you_password";
+$username = "user_name";
+$password = "user_password";
 $database = "grades";
 $connect=mysqli_connect($hostname,$username,$password,$database);
 if (mysqli_connect_errno()){
 	echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
+$subjectcodes[1] = "Mathematics";
+$subjectcodes[2] = "Physics";
+$subjectcodes[3] = "Chemistry";
+$subjectcodes[4] = "Biology";
+$subjectcodes[5] = "English";
+$subjectcodes[6] = "Dutch";
+$subjectcodes[7] = "German";
+$subjectcodes[8] = "Sociology";
+$subjectcodes[9] = "Physical Education";
+$subjectcodes[10] = "Art";
+$subjectcodes[11] = "General Science";
+$subjectcodes[12] = "Philosophy";
+$subjectcodes[13] = "Management and Organization";
+$subjectcodes[14] = "Research and Design";
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -39,13 +58,14 @@ if (mysqli_connect_errno()){
 }
 body{
 	background-color:#2C3E50;
+	color:white;
 	font-family: 'Open Sans', sans-serif;
 }
 .add{
 	margin-top:25px;
 	margin-left:auto;
 	margin-right:auto;
-	width:98%;
+	width:60%;
 	background-color:#34495E;
 	-webkit-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
 	-moz-box-shadow:    1px 0px 25px rgba(50, 50, 50, 0.77);
@@ -91,7 +111,7 @@ form#send-grade{
 	padding-right:10px;
 }
 #card-collection{
-	width:75%;
+	width:60%;
 	margin-left:auto;
 	margin-right:auto;
 	margin-top:20px;
@@ -147,6 +167,11 @@ form#send-grade{
 #footer a{
 	text-decoration:none;
 }
+#textbox{
+	height:10px;
+	width:120px;
+	margin-top:10px;
+}
 </style>
 </head>
 <body>
@@ -159,20 +184,11 @@ Fill in the boxes to add your grade<br><br>
 <form id="send-grade" type="GET">
 <select name="herolist" class="select-block">
     <option value="0" selected="selected" >Choose subject</option>
-    <option value="1">Mathematics</option>
-    <option value="2">Physics</option>
-    <option value="3">Chemistry</option>
-    <option value="4">Biology</option>
-    <option value="5">English</option>
-    <option value="6">Dutch</option>
-    <option value="7">German</option>
-    <option value="8">Sociology</option>
-    <option value="9">Physical Education</option>
-    <option value="10">Art</option>
-    <option value="11">General Science</option>
-    <option value="12">Philosophy</option>
-    <option value="13">Management and Organization</option>
-    <option value="14">Research and Design</option>
+    <?php	
+	foreach ($subjectcodes as $key=>$value) {
+		echo "<option value=" . $key . ">" . $value . "</option>";
+	}
+	?>
 </select>
 <input type="text" name="grade" placeholder="Your grade"/>
 <input type="text" name="weight" placeholder="Weight"/>
@@ -197,17 +213,19 @@ if(isset($_GET["herolist"]) && isset($_GET["grade"]) && isset($_GET["weight"])){
 
 <!-- The place where a summary of grades will be shown -->
 <div id="card-collection">
-
-
 <?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='1' ") or die(mysql_error());  
-if($result->num_rows>0):
+$countsubjects = mysqli_query($connect,"SELECT DISTINCT subject FROM grades;");
+while($row = $countsubjects->fetch_assoc()){
+	$subjectid = $row["subject"];
+	$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' ") or die(mysql_error());  
+	if($result->num_rows>0){	
 ?>
 <div class="card">
 <div class="card-title">
-Mathematics
+<?php echo $subjectcodes[$subjectid]; ?>
 <?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='1'");
+//Display average and total grades
+$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='$subjectid'");
 $grades = 0;
 $weights = 0;
 while($row = $result->fetch_assoc()){
@@ -218,13 +236,36 @@ while($row = $result->fetch_assoc()){
 $average = $grades / $weights;
 echo '| Average: ', round($average, 1) , ' | ';
 echo $result->num_rows, ' Grades' ;
+if(isset($_GET["calculate"])&&isset($_GET["calculate-weight"])&&isset($_GET["calculate-grade"])){
+	if(!$_GET["calculate"]==""&&!$_GET["calculate-weight"]==""&&!$_GET["calculate-grade"]==""){
+		if($_GET["calculate"]==$subjectid){
+		$a = $_GET["calculate-weight"];
+		$y = $_GET["calculate-grade"];
+		$q = $weights;
+		$z = $average;
+		$tobe = (-($a*$y+$q*$y-$q*$z)/$a)*-1;
+		if($tobe>10 or $tobe<0){
+			echo " | Not possible yet";
+		}else{
+			echo " | The grade you need is: " . round($tobe,1);
+		}
+		}
+	}
+}
 ?>
+<form type="GET" style='margin: 0; padding: 0'>
+<input id="textbox" type="text" name="calculate-grade" placeholder="Desired Average"/>
+<input id="textbox" type="text" name="calculate-weight" placeholder="Weight"/>
+<input type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
+<input type="submit" class="btn  btn-primary" value="Calculate">
+</form>
 </div>
 <div class="card-content">
 <?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='1' ") or die(mysql_error());  
+//Code to get grades and display them
+$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' ") or die(mysql_error());  
 while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list grade-object\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
+	echo "<a id=\"gradeshow\" class=\"btn btn-primary list grade-object\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
 		if (confirm('Are you sure you want to delete this grade?')) {
 			window.location ='?remove=" . $row["id"] . "';
 		} else {
@@ -232,6 +273,7 @@ while($row = $result->fetch_assoc()){
 		}
 	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
 }
+//Code to delete chosen grade
 if(isset($_GET["remove"])){
 	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
 	header('Location: ?');
@@ -241,580 +283,7 @@ if(isset($_GET["remove"])){
 
 </div>
 </div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='2' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Physics
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='2'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='2' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='3' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Chemistry
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='3'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='3' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='4' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Biology
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='4'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='4' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='5' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-English
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='5'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='5' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='6' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Dutch
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='6'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='6' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='7' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-German
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='7'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='7' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='8' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Sociology
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='8'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='8' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='9' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Physical Education
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='9'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='9' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='10' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Art
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='10'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='10' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='11' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-General Science
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='11'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='11' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='12' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Philosophy
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='12'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='12' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='13' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Management and Organization
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='13'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='13' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='14' ") or die(mysql_error());  
-if($result->num_rows>0):
-?>
-<div class="card">
-<div class="card-title">
-Research and Design
-<?php
-$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='14'");
-$grades = 0;
-$weights = 0;
-while($row = $result->fetch_assoc()){
-	$summing= $row['grade'] * $row['weight'];
-	$grades += $summing;
-	$weights += $row['weight'];
-}	
-$average = $grades / $weights;
-echo '| Average: ', round($average, 1) , ' | ';
-echo $result->num_rows, ' Grades' ;
-?>
-</div>
-<div class="card-content">
-<?php
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='14' ") or die(mysql_error());  
-while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn btn-primary list\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
-		if (confirm('Are you sure you want to delete this grade?')) {
-			window.location ='?remove=" . $row["id"] . "';
-		} else {
-			return false;
-		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
-}
-if(isset($_GET["remove"])){
-	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
-	echo $_GET["remove"];
-}
-?>
-
-</div>
-</div>
-<?php endif; ?>
-
+<?php }} ?>
 <div id="footer">Proudly made by <a href="http://abakay.tk" target="_blank">Ahmed Bakay</a></div>
 </div>
 </body>
@@ -823,4 +292,3 @@ if(isset($_GET["remove"])){
 <script src="inc/bootstrap.min.js"></script>
 <script src="inc/bootstrap-select.js"></script>
 <script src="inc/application.js"></script>
-
