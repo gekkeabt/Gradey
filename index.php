@@ -1,17 +1,19 @@
 <?php
 // Made By Ahmed Bakay 			//
 // http://abakay.tk 			// 
-// Version 1.5 					//
+// Version 2.0 					//
 // See github for changelogs	//
 ob_start();
+//Database information and connection
 $hostname = "localhost"; 
-$username = "user_name";
-$password = "user_password";
+$username = "root";
+$password = "your_password";
 $database = "grades";
 $connect=mysqli_connect($hostname,$username,$password,$database);
 if (mysqli_connect_errno()){
 	echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
+//List of subjects
 $subjectcodes[1] = "Mathematics";
 $subjectcodes[2] = "Physics";
 $subjectcodes[3] = "Chemistry";
@@ -26,12 +28,12 @@ $subjectcodes[11] = "General Science";
 $subjectcodes[12] = "Philosophy";
 $subjectcodes[13] = "Management and Organization";
 $subjectcodes[14] = "Research and Design";
-
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <title>Grades Manager</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <link href="inc/bootstrap.css" rel="stylesheet">
 <link href="inc/flat-ui.css" rel="stylesheet">
 <style>
@@ -62,59 +64,55 @@ body{
 	font-family: 'Open Sans', sans-serif;
 }
 .add{
-	margin-top:25px;
-	margin-left:auto;
-	margin-right:auto;
-	width:60%;
-	background-color:#34495E;
-	-webkit-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
-	-moz-box-shadow:    1px 0px 25px rgba(50, 50, 50, 0.77);
-	box-shadow:         1px 0px 25px rgba(50, 50, 50, 0.77);
+	padding-top:15px;
+	margin-bottom:50px;
 	text-align:center;
 	color:white;
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
+	position:fixed;
+    top:0;
+    width:100%;
+    z-index:100;
 }
 .add-title{
 	background-color:#1ABC9C;
-	-webkit-border-top-left-radius: 10px;
-	-webkit-border-top-right-radius: 10px;
-	-moz-border-radius-topleft: 10px;
-	-moz-border-radius-topright: 10px;
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-	padding:15px;
-	font-size:50px;
+	padding:16px;
+	font-size:30px;
 	font-weight:700;
+	-webkit-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
+	-moz-box-shadow:    1px 0px 25px rgba(50, 50, 50, 0.77);
+	box-shadow:         1px 0px 25px rgba(50, 50, 50, 0.77);
 }
 .add-content{
 	background-color:#ECF0F1;
 	color: #333333;
-	-webkit-border-bottom-right-radius: 10px;
-	-webkit-border-bottom-left-radius: 10px;
-	-moz-border-radius-bottomright: 10px;
-	-moz-border-radius-bottomleft: 10px;
-	border-bottom-right-radius: 10px;
-	border-bottom-left-radius: 10px;
-	padding:15px;
-	font-size:20px;
+	padding:16px;
+	font-size:30px;
+	-webkit-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
+	-moz-box-shadow:    1px 0px 25px rgba(50, 50, 50, 0.77);
+	box-shadow:         1px 0px 25px rgba(50, 50, 50, 0.77);
 }
-form#send-grade{
-	margin-left:auto;
-	margin-right:auto;
-	width:420px
+#add-grade, #add-weight{
+	width:100px;
+}
+#add-submit{
+	margin-bottom:9px;
 }
 #logo{
 	width:35px;
 	margin-bottom:8px;
 	padding-right:10px;
 }
-#card-collection{
-	width:60%;
+form#send-grade{
 	margin-left:auto;
 	margin-right:auto;
-	margin-top:20px;
+	width:420px
+}
+
+#card-collection{
+	width:70%;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:100px;
 }
 .card{
 	margin-left:auto;
@@ -122,40 +120,45 @@ form#send-grade{
 	margin-top:20px;
 	width:100%;
 	color:white;
+	-webkit-box-shadow: 0px 0px 75px rgba(50, 50, 50, 0.77);
+	-moz-box-shadow:    0px 0px 75px rgba(50, 50, 50, 0.77);
+	box-shadow:         0px 0px 75px rgba(50, 50, 50, 0.77);
+}
+.card:hover{
 }
 .card-title{
-	padding:10px;
-	background-color:#1ABC9C;	
-	-webkit-border-top-left-radius: 10px;
-	-webkit-border-top-right-radius: 10px;
-	-moz-border-radius-topleft: 10px;
-	-moz-border-radius-topright: 10px;
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
+	padding:15px 15px 1px 15px;
+	background-color:#ECF0F1;
+	color: #333333;
 	font-weight:700;
 }
 .card-content{
-	background-color:#ECF0F1;
+	background-color:#ffffff;
 	color: #333333;
-	-webkit-border-bottom-right-radius: 10px;
-	-webkit-border-bottom-left-radius: 10px;
-	-moz-border-radius-bottomright: 10px;
-	-moz-border-radius-bottomleft: 10px;
-	border-bottom-right-radius: 10px;
-	border-bottom-left-radius: 10px;
 	padding:15px;
 	font-size:15px;
 }
-.list{
-	margin-left:10px;
-	margin-right:10px;
+.card-weight{
+	font-size:14px;
+	color:#00A1CB;
+	font-weight:700;
 }
-.weight-font{
-	font-size:10px;
+.card-grade:hover{
+	background-color:#E54028;
+}
+.card-grade{
+	margin:7.5px;
+	background-color:#ECF0F1;
 	color:#333333;
 }
-.grade-object{
-	margin:7.5px;
+.calc{
+	margin-top:10px;
+}
+#calc-weight,#calc-average{
+	width:60px;
+}
+#calc-submit{
+	margin-bottom:9px;
 }
 #footer{
 	margin-top:15px;
@@ -167,51 +170,99 @@ form#send-grade{
 #footer a{
 	text-decoration:none;
 }
-#textbox{
-	height:10px;
-	width:120px;
-	margin-top:10px;
-}
 </style>
+<?php
+// Include and instantiate the class.
+require_once 'inc/mobile.php';
+$detect = new Mobile_Detect;
+ 
+// Any mobile device (phones or tablets).
+if ( $detect->isMobile() ) {
+	echo "
+	
+	<style>
+	.add{
+		width:100%;
+		background-color:#ECF0F1;
+		padding-bottom:10px;
+		border-bottom:solid 5px #333;
+		-webkit-box-shadow: 0px 0px 50px rgba(50, 50, 50, 0.77);
+		-moz-box-shadow:    0px 0px 50px rgba(50, 50, 50, 0.77);
+		box-shadow:         0px 0px 50px rgba(50, 50, 50, 0.77);
+	}
+	.add-title{
+		display:none;
+	}
+	.add-content{
+		width:100%;
+		-webkit-box-shadow: 0px 0px 0px;
+		-moz-box-shadow:    0px 0px 0px;
+		box-shadow:         0px 0px 0px;
+		background-color:transparent;
+	}
+	#card-collection{
+		width:100%;
+		margin-top:125px;
+	}
+	.card{	
+		-webkit-box-shadow: 0px 0px 0px rgba(50, 50, 50, 0.77);
+		-moz-box-shadow:    0px 0px 0px rgba(50, 50, 50, 0.77);
+		box-shadow:         0px 0px 0px rgba(50, 50, 50, 0.77);
+	}
+	.card-title{
+		color:#333333;
+	}
+	.card-content{
+		background-color:white;
+	}
+	#add-subject{
+		width:94%;
+		margin-bottom:15px;
+	}
+	</style>";
+}
+?>
+
 </head>
-<body>
+<body onunload="unloadP('UniquePageNameHereScroll')" onload="loadP('UniquePageNameHereScroll')">
+<!-- Place where the add bar is shown -->
 <div class="add">
-<div class="add-title">
+<span class="add-title">
 <img id="logo" src="inc/logo.png" alt="Logo" />ADD GRADE
-</div>
-<div class="add-content">
-Fill in the boxes to add your grade<br><br>
-<form id="send-grade" type="GET">
-<select name="herolist" class="select-block">
+</span>
+<span class="add-content">
+<form id="send-grade" method="POST" style="display:inline;">
+<select id="add-subject" name="add-subject" class="select-block">
     <option value="0" selected="selected" >Choose subject</option>
-    <?php	
+    <?php
+	//Load the subjects
 	foreach ($subjectcodes as $key=>$value) {
 		echo "<option value=" . $key . ">" . $value . "</option>";
 	}
 	?>
 </select>
-<input type="text" name="grade" placeholder="Your grade"/>
-<input type="text" name="weight" placeholder="Weight"/>
-<input type="submit" class="btn btn-block btn-primary" value="Add Grade">
+<input id="add-grade" type="text" name="add-grade" placeholder="Your grade"/>
+<input id="add-weight" type="text" name="add-weight" placeholder="Weight"/>
+<input id="add-submit" type="submit" value="Add" class="btn btn-inverse"/>
 </form>
+</span>
 <?php
-if(isset($_GET["herolist"]) && isset($_GET["grade"]) && isset($_GET["weight"])){
-	if($_GET["herolist"]=="0" or $_GET["grade"]=="" or $_GET["weight"]==""){
+//Code to add a grade
+if(isset($_POST["add-subject"]) && isset($_POST["add-grade"]) && isset($_POST["add-weight"])){
+	if($_POST["add-subject"]=="0" or $_POST["add-grade"]=="" or $_POST["add-weight"]==""){
 		echo "<p align=\"center\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"We are not set yet...\"></p>";
 		header('Refresh: 1.5; url=?');
 	}else{
-		$grade = $_GET["grade"];
+		$grade = $_POST["add-grade"];
 		$grade = str_replace(',', '.', $grade);
 		mysqli_query($connect,"INSERT INTO grades (subject, grade, weight)
-		VALUES (" .  $_GET["herolist"] . "," . $grade . "," . $_GET["weight"] . ")");
+		VALUES (" .  $_POST["add-subject"] . "," . $grade . "," . $_POST["add-weight"] . ")");
 		header('Location: ?');
 	}
 }
 ?>
 </div>
-</div>
-
-<!-- The place where a summary of grades will be shown -->
+<!-- Place where all the grades are shown -->
 <div id="card-collection">
 <?php
 $countsubjects = mysqli_query($connect,"SELECT DISTINCT subject FROM grades;");
@@ -222,8 +273,8 @@ while($row = $countsubjects->fetch_assoc()){
 ?>
 <div class="card">
 <div class="card-title">
-<?php echo $subjectcodes[$subjectid]; ?>
 <?php
+echo $subjectcodes[$subjectid];
 //Display average and total grades
 $result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='$subjectid'");
 $grades = 0;
@@ -236,13 +287,19 @@ while($row = $result->fetch_assoc()){
 $average = $grades / $weights;
 echo '| Average: ', round($average, 1) , ' | ';
 echo $result->num_rows, ' Grades' ;
-if(isset($_GET["calculate"])&&isset($_GET["calculate-weight"])&&isset($_GET["calculate-grade"])){
-	if(!$_GET["calculate"]==""&&!$_GET["calculate-weight"]==""&&!$_GET["calculate-grade"]==""){
-		if($_GET["calculate"]==$subjectid){
-		$a = $_GET["calculate-weight"];
-		$y = $_GET["calculate-grade"];
+//The formula for calculation
+if(isset($_POST["calculate"])&&isset($_POST["calc-weight"])&&isset($_POST["calc-average"])){
+	if(!$_POST["calculate"]==""&&!$_POST["calc-weight"]==""&&!$_POST["calc-average"]==""){
+		if($_POST["calculate"]==$subjectid){
+		$a = $_POST["calc-weight"];
+		$y = $_POST["calc-average"];
 		$q = $weights;
 		$z = $average;
+		// x = Grade to get the average you want
+		// y = Average you want to have
+		// z = Current Average
+		// q = Total weight of current average
+		// a = Weight of the test you will get
 		$tobe = (-($a*$y+$q*$y-$q*$z)/$a)*-1;
 		if($tobe>10 or $tobe<0){
 			echo " | Not possible yet";
@@ -253,11 +310,11 @@ if(isset($_GET["calculate"])&&isset($_GET["calculate-weight"])&&isset($_GET["cal
 	}
 }
 ?>
-<form type="GET" style='margin: 0; padding: 0'>
-<input id="textbox" type="text" name="calculate-grade" placeholder="Desired Average"/>
-<input id="textbox" type="text" name="calculate-weight" placeholder="Weight"/>
-<input type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
-<input type="submit" class="btn  btn-primary" value="Calculate">
+<form class="calc" method="POST" action="index.php">
+<input id="calc-average" type="text" name="calc-average" placeholder="Goal"/>
+<input id="calc-weight" type="text" name="calc-weight" placeholder="Weight"/>
+<input id="calc-sybject" type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
+<input type="submit" id="calc-submit" value="Calculate" class="btn btn-inverse">
 </form>
 </div>
 <div class="card-content">
@@ -265,13 +322,13 @@ if(isset($_GET["calculate"])&&isset($_GET["calculate-weight"])&&isset($_GET["cal
 //Code to get grades and display them
 $result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' ") or die(mysql_error());  
 while($row = $result->fetch_assoc()){
-	echo "<a id=\"gradeshow\" class=\"btn btn-primary list grade-object\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
+	echo "<a class=\"btn card-grade\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
 		if (confirm('Are you sure you want to delete this grade?')) {
 			window.location ='?remove=" . $row["id"] . "';
 		} else {
 			return false;
 		}
-	\">   " . $row['grade']." <span class=\"weight-font\"> ".$row['weight'] . "</span></a>";
+	\">   " . $row['grade']." <span class=\"card-weight\"> ".$row['weight'] . "</span></a>";
 }
 //Code to delete chosen grade
 if(isset($_GET["remove"])){
@@ -280,15 +337,63 @@ if(isset($_GET["remove"])){
 	echo $_GET["remove"];
 }
 ?>
-
 </div>
 </div>
 <?php }} ?>
-<div id="footer">Proudly made by <a href="http://abakay.tk" target="_blank">Ahmed Bakay</a></div>
 </div>
+<div id="footer">Proudly made by <a href="http://abakay.tk" target="_blank">Ahmed Bakay</a></div>
 </body>
 </html>
-<script src="inc/jquery-1.8.3.min.js"></script>
 <script src="inc/bootstrap.min.js"></script>
+<script src="inc/jquery-1.8.3.min.js"></script>
 <script src="inc/bootstrap-select.js"></script>
 <script src="inc/application.js"></script>
+<script>
+function getScrollXY() {
+    var x = 0, y = 0;
+    if( typeof( window.pageYOffset ) == 'number' ) {
+        x = window.pageXOffset;
+        y = window.pageYOffset;
+    } else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) {
+        x = document.body.scrollLeft;
+        y = document.body.scrollTop;
+    } else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) {
+        x = document.documentElement.scrollLeft;
+        y = document.documentElement.scrollTop;
+    }
+    return [x, y];
+}
+           
+function setScrollXY(x, y) {
+    window.scrollTo(x, y);
+}
+function createCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+function readCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+function loadP(pageref){
+	x=readCookie(pageref+'x');
+	y=readCookie(pageref+'y');
+	setScrollXY(x,y)
+}
+function unloadP(pageref){
+	s=getScrollXY()
+	createCookie(pageref+'x',s[0],0.1);
+	createCookie(pageref+'y',s[1],0.1);
+}
+</script>
