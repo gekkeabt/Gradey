@@ -22,7 +22,7 @@ Changelog
 - Mobile support
 - No need to scroll everytime you want to add a grade or want to calculate something
 
-For advanced users
+Add/Remove subjects
 ------------
 If you want to add or remove subjects you have to change the items in the array at the top of the page.
 
