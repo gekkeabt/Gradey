@@ -1,7 +1,7 @@
 <?php
 // Made By Ahmed Bakay 			//
 // http://abakay.tk 			// 
-// Version 1.3 					//
+// Version 1.5 					//
 // See github for changelogs	//
 ob_start();
 $hostname = "localhost"; 
