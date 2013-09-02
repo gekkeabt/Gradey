@@ -1,4 +1,4 @@
-GradeManager 2.0
+GradeManager 2.5
 =
 
 With this you can manage all your grades of school easily via your webbrowser and since this version even from your mobile phone which makes it a lot easier!
@@ -8,7 +8,7 @@ Installation
 - Import the sql file in the 'inc' folder into mysql ( with PHPMyAdmin, for example )
 - Open the 'index.php' file with your favorite editor and configure the username, password and host of mysql
 - Go to the url of the folder you placed the files in
-- Select a subject, enter your grade, the weight of it and then click on Add Grade
+- Select a period, subject, enter your grade, the weight of it and then click on Add Grade
 - You can view and remove all your grades on the same page
 - To see the date and time you added the grade hover over it
 - To delete a grade click on it and then click on Ok
@@ -17,10 +17,10 @@ grade you will get and click on calculate to see what grade you need to get. Som
 
 Changelog
 ------------
-- Easier to use, because of not noticable refresh when something is done
-- Better design
-- Mobile support
-- No need to scroll everytime you want to add a grade or want to calculate something
+- Added support for periods ( 4 periods )
+- Shows your overall score
+- Some design changed
+- Little changes in code
 
 Add/Remove subjects
 ------------

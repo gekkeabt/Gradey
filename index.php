@@ -1,13 +1,13 @@
 <?php
 // Made By Ahmed Bakay 			//
 // http://abakay.tk 			// 
-// Version 2.0 					//
+// Version 2.5 					//
 // See github for changelogs	//
 ob_start();
 //Database information and connection
 $hostname = "localhost"; 
 $username = "root";
-$password = "your_password";
+$password = "usbw";
 $database = "grades";
 $connect=mysqli_connect($hostname,$username,$password,$database);
 if (mysqli_connect_errno()){
@@ -91,6 +91,9 @@ body{
 	-moz-box-shadow:    1px 0px 25px rgba(50, 50, 50, 0.77);
 	box-shadow:         1px 0px 25px rgba(50, 50, 50, 0.77);
 }
+#add-period{
+	width:50px;
+}
 #add-grade, #add-weight{
 	width:100px;
 }
@@ -109,7 +112,7 @@ form#send-grade{
 }
 
 #card-collection{
-	width:70%;
+	width:700px;
 	margin-left:auto;
 	margin-right:auto;
 	margin-top:100px;
@@ -123,8 +126,6 @@ form#send-grade{
 	-webkit-box-shadow: 0px 0px 75px rgba(50, 50, 50, 0.77);
 	-moz-box-shadow:    0px 0px 75px rgba(50, 50, 50, 0.77);
 	box-shadow:         0px 0px 75px rgba(50, 50, 50, 0.77);
-}
-.card:hover{
 }
 .card-title{
 	padding:15px 15px 1px 15px;
@@ -170,13 +171,25 @@ form#send-grade{
 #footer a{
 	text-decoration:none;
 }
+	color:#E94007;
+.period-select{
+}
+.period-select:hover{
+	color:#E2DF9A;
+}
+#footer{
+	margin-top:10px;
+}
+.overall{
+	display:none;
+}
 </style>
 <?php
-// Include and instantiate the class.
+// Include and create checking class for mobile device
 require_once 'inc/mobile.php';
 $detect = new Mobile_Detect;
  
-// Any mobile device (phones or tablets).
+// Detect if user is using a mobile device
 if ( $detect->isMobile() ) {
 	echo "
 	
@@ -216,14 +229,18 @@ if ( $detect->isMobile() ) {
 		background-color:white;
 	}
 	#add-subject{
-		width:94%;
+		width:74%;
 		margin-bottom:15px;
+	}
+	#add-period{
+		margin-bottom:14px;
+	}
+	.btn-group a{
+		font-size:5px;
 	}
 	</style>";
 }
-?>
-
-</head>
+?></head>
 <body onunload="unloadP('UniquePageNameHereScroll')" onload="loadP('UniquePageNameHereScroll')">
 <!-- Place where the add bar is shown -->
 <div class="add">
@@ -232,7 +249,13 @@ if ( $detect->isMobile() ) {
 </span>
 <span class="add-content">
 <form id="send-grade" method="POST" style="display:inline;">
-<select id="add-subject" name="add-subject" class="select-block">
+<select id="add-period" name="add-period">
+	<option value="1" selected="selected">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+</select>
+<select id="add-subject" name="add-subject">
     <option value="0" selected="selected" >Choose subject</option>
     <?php
 	//Load the subjects
@@ -251,13 +274,13 @@ if ( $detect->isMobile() ) {
 if(isset($_POST["add-subject"]) && isset($_POST["add-grade"]) && isset($_POST["add-weight"])){
 	if($_POST["add-subject"]=="0" or $_POST["add-grade"]=="" or $_POST["add-weight"]==""){
 		echo "<p align=\"center\" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"We are not set yet...\"></p>";
-		header('Refresh: 1.5; url=?');
+		header('Refresh: 1.5; url=?'. $_GET["period"] .'');
 	}else{
 		$grade = $_POST["add-grade"];
 		$grade = str_replace(',', '.', $grade);
-		mysqli_query($connect,"INSERT INTO grades (subject, grade, weight)
-		VALUES (" .  $_POST["add-subject"] . "," . $grade . "," . $_POST["add-weight"] . ")");
-		header('Location: ?');
+		mysqli_query($connect,"INSERT INTO grades (period, subject, grade, weight)
+		VALUES (" . $_POST["add-period"] . "," . $_POST["add-subject"] . "," . $grade . "," . $_POST["add-weight"] . ")");
+		header('Location: ?period='. $_GET["period"] .'');
 	}
 }
 ?>
@@ -265,10 +288,94 @@ if(isset($_POST["add-subject"]) && isset($_POST["add-grade"]) && isset($_POST["a
 <!-- Place where all the grades are shown -->
 <div id="card-collection">
 <?php
-$countsubjects = mysqli_query($connect,"SELECT DISTINCT subject FROM grades;");
+$countsubjects = mysqli_query($connect,"SELECT DISTINCT subject FROM grades");
 while($row = $countsubjects->fetch_assoc()){
 	$subjectid = $row["subject"];
-	$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' ") or die(mysql_error());  
+	$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' AND period='" . $_GET["period"] . "'") or die(mysql_error());  
+	if($result->num_rows>0){	
+?>
+<div class="card">
+<div class="card-title">
+<?php
+echo $subjectcodes[$subjectid];
+//Display average and total grades
+$result = mysqli_query($connect,"SELECT * FROM grades WHERE subject='$subjectid' AND period='" . $_GET["period"] . "' ");
+$grades = 0;
+$weights = 0;
+while($row = $result->fetch_assoc()){
+	$summing= $row['grade'] * $row['weight'];
+	$grades += $summing;
+	$weights += $row['weight'];
+}	
+$average = $grades / $weights;
+echo '| Average: ', round($average, 1) , ' | ';
+echo $result->num_rows, ' Grades' ;
+//The formula for calculation
+if(isset($_POST["calculate"])&&isset($_POST["calc-weight"])&&isset($_POST["calc-average"])){
+	if(!$_POST["calculate"]==""&&!$_POST["calc-weight"]==""&&!$_POST["calc-average"]==""){
+		if($_POST["calculate"]==$subjectid){
+		$a = $_POST["calc-weight"];
+		$y = $_POST["calc-average"];
+		$q = $weights;
+		$z = $average;
+		// x = Grade to get the average you want
+		// y = Average you want to have
+		// z = Current Average
+		// q = Total weight of current average
+		// a = Weight of the test you will get
+		$tobe = (-($a*$y+$q*$y-$q*$z)/$a)*-1;
+		if($tobe>10 or $tobe<0){
+			echo " | Not possible yet";
+		}else{
+			echo " | The grade you need is: " . round($tobe,1);
+		}
+		}
+	}
+}
+?>
+<form class="calc" method="POST" action="index.php?period=<?php echo $_GET["period"]; ?>">
+<input id="calc-average" type="text" name="calc-average" placeholder="Goal"/>
+<input id="calc-weight" type="text" name="calc-weight" placeholder="Weight"/>
+<input id="calc-subject" type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
+<input type="submit" id="calc-submit" value="Calculate" class="btn btn-inverse">
+</form>
+</div>
+<div class="card-content">
+<?php
+//Code to get grades and display them
+$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' AND period='" . $_GET["period"] . "' ") or die(mysql_error());  
+while($row = $result->fetch_assoc()){
+	echo "<a class=\"btn card-grade\" href=\"?remove=". $row["id"] . "&period=" . $_GET["period"] . "\" title='" . $row["date"] . "' onclick=\"
+		if (confirm('Are you sure you want to delete this grade?')) {
+			window.location ='?remove=" . $row["id"] . "';
+		} else {
+			return false;
+		}
+	\">   " . $row['grade']." <span class=\"card-weight\"> ".$row['weight'] . "</span></a>";
+}
+//Code to delete chosen grade
+if(isset($_GET["remove"])){
+	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
+	header('Location: ?period=' . $_GET["period"] . '');
+	echo $_GET["remove"];
+}
+?>
+</div>
+</div>
+<?php }} ?>
+</div>
+<div id="card-collection" class="overall">
+<?php
+if(!isset($_GET["period"])){
+	header('Location: ?period=1');
+}elseif($_GET["period"]=="overall"){
+	echo "<style>.overall{display:block;}</style>";
+}
+
+$countsubjects = mysqli_query($connect,"SELECT DISTINCT subject FROM grades");
+while($row = $countsubjects->fetch_assoc()){
+	$subjectid = $row["subject"];
+	$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid'") or die(mysql_error());  
 	if($result->num_rows>0){	
 ?>
 <div class="card">
@@ -310,19 +417,19 @@ if(isset($_POST["calculate"])&&isset($_POST["calc-weight"])&&isset($_POST["calc-
 	}
 }
 ?>
-<form class="calc" method="POST" action="index.php">
+<form class="calc" method="POST" action="index.php?period=<?php echo $_GET["period"]; ?>">
 <input id="calc-average" type="text" name="calc-average" placeholder="Goal"/>
 <input id="calc-weight" type="text" name="calc-weight" placeholder="Weight"/>
-<input id="calc-sybject" type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
+<input id="calc-subject" type="hidden" name="calculate" value="<?php echo $subjectid;?>" />
 <input type="submit" id="calc-submit" value="Calculate" class="btn btn-inverse">
 </form>
 </div>
 <div class="card-content">
 <?php
 //Code to get grades and display them
-$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid' ") or die(mysql_error());  
+$result = mysqli_query($connect, "SELECT * FROM grades WHERE subject='$subjectid'") or die(mysql_error());  
 while($row = $result->fetch_assoc()){
-	echo "<a class=\"btn card-grade\" href=\"?remove=". $row["id"] . "\" title='" . $row["date"] . "' onclick=\"
+	echo "<a class=\"btn card-grade\" href=\"?remove=". $row["id"] . "&period=" . $_GET["period"] . "\" title='" . $row["date"] . "' onclick=\"
 		if (confirm('Are you sure you want to delete this grade?')) {
 			window.location ='?remove=" . $row["id"] . "';
 		} else {
@@ -333,7 +440,7 @@ while($row = $result->fetch_assoc()){
 //Code to delete chosen grade
 if(isset($_GET["remove"])){
 	mysqli_query($connect, "DELETE FROM grades WHERE id='". $_GET["remove"] ."'");
-	header('Location: ?');
+	header('Location: ?period=' . $_GET["period"] . '');
 	echo $_GET["remove"];
 }
 ?>
@@ -341,7 +448,18 @@ if(isset($_GET["remove"])){
 </div>
 <?php }} ?>
 </div>
-<div id="footer">Proudly made by <a href="http://abakay.tk" target="_blank">Ahmed Bakay</a></div>
+<div id="footer">
+<div class="btn-toolbar">
+	<div class="btn-group">
+		<a class="btn btn-inverse" href="?period=1">Period 1</a>
+		<a class="btn btn-inverse" href="?period=2">Period 2</a>
+		<a class="btn btn-inverse" href="?period=3">Period 3</a>
+		<a class="btn btn-inverse" href="?period=4">Period 4</a>
+    </div>
+</div>
+<a class="btn btn-inverse" href="?period=overall">Overall</a><br><br>
+Proudly made by <a href="http://abakay.tk" target="_blank">Ahmed Bakay</a>
+</div>
 </body>
 </html>
 <script src="inc/bootstrap.min.js"></script>
