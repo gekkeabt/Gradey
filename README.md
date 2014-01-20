@@ -1,4 +1,4 @@
-GradeManager 2.5
+GradeManager 3.0
 =
 
 With this you can manage all your grades of school/university easily via your webbrowser and it has a responsive layout too, so you can access it on the go!
