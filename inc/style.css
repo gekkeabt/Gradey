@@ -1,0 +1,129 @@
+* {
+    margin: 0px;
+}
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #ECF0F1;
+}
+
+.login{
+     width:100%;
+    height:100%;
+    position:fixed;
+    color:white;
+    background-color:#333;
+    z-index:100;
+    background:url(tweed.png);
+}
+.login-center{
+     width:100%;
+    height:100%;
+}
+.login-form{
+     width:400px;
+    position:absolute;
+	left:auto;
+	top:auto;
+    background-color:#333;
+    padding:20px;
+    padding-bottom:30px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    -webkit-box-shadow: 0 0 50px 5px #333;
+    box-shadow: 0 0 50px 5px #333;
+    background-color:white;
+     color:#333;
+}
+.login-form input{
+     width:100%;   
+}
+
+.add {
+    padding-top: 15px;
+    text-align: center;
+    position: fixed;
+    width: 100%;
+    z-index:99;
+}
+.add-average{
+     font-size:20px;
+}
+.add-content {
+    background-color: #ECF0F1;
+    color: #333333;
+    padding: 16px;
+    font-size: 30px;
+    -webkit-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
+    -moz-box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
+    box-shadow: 1px 0px 25px rgba(50, 50, 50, 0.77);
+}
+.add-period{
+     width:40px;
+    height: 33px;
+}
+.add-grade,
+.add-weight {
+    width: 60px;
+    height: 33px;
+}
+.add-subject {
+    width: 75px;
+}
+.send-grade{
+     display:inline;
+}
+
+
+
+.card-collection {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    padding-top: 100px;
+}
+.subjecttitle{
+    cursor:pointer;   
+    color: #2980b9;
+    font-size: 18px;
+
+}
+.card-weight {
+    font-size: 9px;
+    color: #352742;
+}
+.card-grades {
+    padding-top: 22px;
+    font-weight: 700;
+    font-size: 20px;
+}
+.calc-popup{
+    position:absolute;
+    top:65px;
+    z-index:98;
+}
+.meter{
+    font-size:14px;
+    color: white;
+    padding-left: 5px;
+    padding-top: 2.5px;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+.logout{
+     text-align:center;   
+}
+.foot-note{
+ text-align:right;   
+}
+
+@media only screen and (min-device-width: 0px) and (max-device-width: 540px) {
+    .card-collection {
+        width: 100%;
+    }
+    .login-form{
+    width:100%;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;   
+    }
+}
